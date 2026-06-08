@@ -3,7 +3,8 @@
     "strict": true,
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "types": ["node"]
   },
   "include": ["src"]
 }
