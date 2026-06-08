@@ -1,4 +1,4 @@
-import { createServer, createConnection, Socket } from "node:net";
+import { createConnection, createServer, type Socket } from "node:net";
 
 class Parser {
   private clientSocket: Socket | null = null;
