@@ -1,102 +1,81 @@
-import { createConnection, createServer, type Socket } from "node:net";
+import { createServer } from "node:net";
+import { parseHttpRequest } from "./proxy/http-parser.js";
+import { createHttpProxy } from "./proxy/http-proxy.js";
+import type { ProxyConfig } from "./types.js";
 
-class Parser {
-  private clientSocket: Socket | null = null;
-  private chunk: string = "";
-  private method = "";
-  private path = "";
-  private version = "";
-  private RequestHeaders: Record<string, string> = {};
-  private body = "";
-  private contentLength = 0;
+const DEFAULT_PROXY_PORT = 6677;
 
-  private host: URL | null = null;
-  private _connection: Socket | null = null;
-
-  constructor({ clientSocket }: { clientSocket: Socket }) {
-    this.clientSocket = clientSocket;
-  }
-
-  private get targetConnection() {
-    if (!this._connection) {
-      this._connection = createConnection({
-        host: this.host?.hostname ?? "",
-        port: this.host?.port ? parseInt(this.host.port, 10) : 80,
-      });
-
-      this._connection.addListener("data", (data) => {
-        console.log("服务端返回数据", data);
-      });
-    }
-    return this._connection;
-  }
-
-  public appendChunk(data: string): void {
-    this.chunk += data;
-
-    this.parse();
-  }
-
-  private parse(): void {
-    const lines = this.chunk.split("\r\n");
-    const divider = lines.indexOf("");
-
-    const [header, body] = [lines.slice(0, divider), lines.slice(divider + 1)];
-
-    // Parse request line
-    const firstLine = header[0];
-    const [method, path, version] = firstLine.split(" ");
-    this.method = method;
-    this.path = path;
-    this.version = version;
-
-    // Parse headers
-    header.splice(1).forEach((line) => {
-      const [key, value] = line.split(": ");
-      this.RequestHeaders[key] = value;
-    });
-
-    // 获取重要参数
-    this.contentLength = parseInt(this.RequestHeaders["Content-Length"], 10);
-
-    // Parse body
-    this.body = body.join("\r\n");
-
-    // 获取业务参数
-    this.host = new URL(this.path);
-
-    console.log({
-      method: this.method,
-      path: this.path,
-      version: this.version,
-      RequestHeaders: this.RequestHeaders,
-      body: this.body,
-      contentLength: this.contentLength,
-    });
-
-    console.log("host", this.host);
-
-    if (divider) {
-      this.targetConnection.write(this.chunk);
-    }
-  }
+function getConfig(): ProxyConfig {
+  return {
+    port: DEFAULT_PROXY_PORT,
+    host: "127.0.0.1",
+  };
 }
 
-const server = createServer((socket) => {
-  const parser = new Parser({ clientSocket: socket });
-  socket.on("data", (data) => {
-    parser.appendChunk(data.toString());
+function startServer(config: ProxyConfig): void {
+  const server = createServer((clientSocket) => {
+    // 每个连接有自己的缓冲区，用来从 TCP 字节流中拼出完整请求
+    let buffer = Buffer.alloc(0);
+
+    // 一旦把 socket 交给代理（pipe 建立后），就不再监听 data 事件，
+    // 后续数据流由 pipe 处理
+    let proxied = false;
+
+    clientSocket.on("error", (err) => {
+      console.error("[proxy] client socket error:", err.message);
+    });
+
+    clientSocket.on("data", (chunk: Buffer) => {
+      if (proxied) return;
+
+      // 把新收到的字节追加到缓冲区
+      buffer = Buffer.concat([buffer, chunk]);
+
+      // 尝试从缓冲区中拆出完整请求
+      const result = parseHttpRequest(buffer);
+      if (!result) {
+        // 数据还不够拼出一条完整请求，继续等
+        return;
+      }
+
+      // 从缓冲区中移除已消费的字节
+      const { request, bytesConsumed } = result;
+      buffer = buffer.subarray(bytesConsumed);
+
+      if (request.method === "CONNECT") {
+        // CONNECT 隧道是 Phase 3 的内容，目前先拒绝
+        console.log("[proxy] CONNECT rejected (HTTPS not implemented yet)");
+        clientSocket.write("HTTP/1.1 405 Method Not Allowed\r\n\r\n");
+        clientSocket.end();
+        return;
+      }
+
+      console.log(
+        `[proxy] ${request.method} ${request.url.href} ${request.httpVersion}`,
+      );
+
+      proxied = true;
+      createHttpProxy({ request, clientSocket });
+    });
+
+    clientSocket.on("end", () => {
+      console.log("[proxy] client disconnected");
+    });
   });
 
-  socket.on("end", () => {
-    console.log("Client disconnected");
+  server.listen(config.port, config.host, () => {
+    console.log(`
+  mini-switch v1.0.0
+  ────────────────────────────────────
+  Proxy:      http://${config.host}:${config.port}
+  `);
   });
 
-  socket.on("error", (err) => {
-    console.error("Socket error:", err);
+  server.on("error", (err) => {
+    console.error("[proxy] server error:", err.message);
+    process.exit(1);
   });
-});
+}
 
-server.listen(6677).addListener("listening", () => {
-  console.log("Server is listening on port 6677");
-});
+const config = getConfig();
+startServer(config);
