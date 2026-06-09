@@ -50,9 +50,7 @@ function startServer(config: ProxyConfig): void {
         return;
       }
 
-      console.log(
-        `[proxy] ${request.method} ${request.url.href} ${request.httpVersion}`,
-      );
+      console.log(`[proxy] ← client ${request.method} ${request.url.href}`);
 
       proxied = true;
       createHttpProxy({ request, clientSocket });

@@ -39,3 +39,50 @@ export interface ProxyContext {
   request: ParsedHttpRequest;
   clientSocket: Socket;
 }
+
+/**
+ * 解析后的 HTTP 响应。
+ *
+ * 与请求不同，请求行是 METHOD URL VERSION，
+ * 响应行是 VERSION STATUS_CODE STATUS_TEXT。
+ */
+export interface ParsedHttpResponse {
+  statusCode: number;
+  statusText: string;
+  httpVersion: string;
+  headers: Record<string, string>;
+  body: string;
+  /** 要转发给客户端的原始字节（状态行 + 头部 + body） */
+  raw: string;
+}
+
+/**
+ * HTTP 响应解析器的返回值 —— 联合类型，对应 3 种 body 分帧方式。
+ *
+ *  HTTP/1.1 有三种标记 body 结束的方式：
+ *    1. Content-Length                         → complete（精确字节数）
+ *    2. Transfer-Encoding: chunked             → complete（分段解码）
+ *    3. 两者都没有 + 服务器关连接              → need-close（等 socket close）
+ */
+export interface ParseResponseComplete {
+  type: "complete";
+  response: ParsedHttpResponse;
+  bytesConsumed: number;
+}
+
+export interface ParseResponseNeedClose {
+  type: "need-close";
+  statusCode: number;
+  statusText: string;
+  httpVersion: string;
+  headers: Record<string, string>;
+  /** 状态行 + 头部 + \r\n\r\n 的原始字节 */
+  headRaw: string;
+  /** \r\n\r\n 在原始 buffer 中的起始位置 */
+  headEnd: number;
+}
+
+export type ParseHttpResponseResult =
+  | ParseResponseComplete
+  | ParseResponseNeedClose
+  | null;
