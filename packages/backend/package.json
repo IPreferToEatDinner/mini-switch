@@ -1,0 +1,22 @@
+{
+  "name": "@mini-switch/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --watch src/cli.ts",
+    "build": "tsc",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "1.0.0-rc.3-0ce9d30"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "drizzle-kit": "1.0.0-rc.4-ca0f029",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
