@@ -29,8 +29,8 @@ export interface DomainItem {
 }
 
 export const MOCK_DOMAINS: DomainItem[] = [
-  { name: "All Traffic", color: "var(--status-green)", active: true },
-  { name: "api.nebula.dev", color: "var(--status-blue)", active: true },
+  { name: "All Traffic", color: "var(--bg-ambient-1)", active: true },
+  { name: "api.nebula.dev", color: "#61afef", active: true },
   { name: "cdn.static-assets.com" },
   { name: "google-analytics.com" },
   { name: "auth.internal.service" },
@@ -181,13 +181,3 @@ export type SubTab = "headers" | "body" | "cookies" | "raw";
 
 export const INSPECTOR_TABS: InspectorTab[] = ["request", "response", "rules"];
 export const SUB_TABS: SubTab[] = ["headers", "body", "cookies", "raw"];
-
-// ===== Helpers =====
-export function statusClass(code: number): string {
-  if (code === 200) return "status-200";
-  if (code === 304) return "status-304";
-  if (code === 404) return "status-404";
-  if (code === 204) return "status-204";
-  if (code >= 400) return "status-4xx";
-  return "status-200";
-}

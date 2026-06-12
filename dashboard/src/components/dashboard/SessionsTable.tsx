@@ -9,6 +9,11 @@ interface SessionsTableProps {
   onSelect?: (session: SessionItem) => void;
 }
 
+const thClass =
+  "sticky top-0 bg-[rgba(15,10,15,0.85)] backdrop-blur-[8px] px-[14px] py-2 text-nova-tertiary font-medium uppercase text-[10px] tracking-[0.05em] border-b border-white/[0.08] z-10";
+const tdClass =
+  "px-[14px] py-2 whitespace-nowrap overflow-hidden text-ellipsis text-nova-secondary font-mono text-[11px]";
+
 /** 请求会话表格 */
 export function SessionsTable({
   sessions,
@@ -19,16 +24,28 @@ export function SessionsTable({
     <Panel className="flex-1">
       <TableToolbar count={sessions.length} />
       <div className="flex-1 overflow-auto">
-        <table className="session-table">
+        <table className="w-full border-collapse text-xs text-left">
           <thead>
             <tr>
-              <th style={{ width: 50 }}>ID</th>
-              <th style={{ width: 80 }}>Status</th>
-              <th style={{ width: 70 }}>Method</th>
-              <th style={{ width: 180 }}>Host</th>
-              <th>Path</th>
-              <th style={{ width: 80 }}>Type</th>
-              <th style={{ width: 70 }}>Size</th>
+              <th className={thClass} style={{ width: 50 }}>
+                ID
+              </th>
+              <th className={thClass} style={{ width: 80 }}>
+                Status
+              </th>
+              <th className={thClass} style={{ width: 70 }}>
+                Method
+              </th>
+              <th className={thClass} style={{ width: 180 }}>
+                Host
+              </th>
+              <th className={thClass}>Path</th>
+              <th className={thClass} style={{ width: 80 }}>
+                Type
+              </th>
+              <th className={thClass} style={{ width: 70 }}>
+                Size
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -36,17 +53,19 @@ export function SessionsTable({
               <tr
                 key={s.id}
                 onClick={() => onSelect?.(s)}
-                className={`session-row ${s.active || s.id === activeId ? "active" : ""}`}
+                className={`border-b border-white/[0.03] cursor-pointer transition-colors duration-100 hover:bg-white/[0.03] ${
+                  s.active || s.id === activeId ? "bg-white/[0.08]" : ""
+                }`}
               >
-                <td>{s.id}</td>
-                <td>
+                <td className={tdClass}>{s.id}</td>
+                <td className={tdClass}>
                   <StatusPill status={s.status} />
                 </td>
-                <td>{s.method}</td>
-                <td>{s.host}</td>
-                <td>{s.path}</td>
-                <td>{s.type}</td>
-                <td>{s.size}</td>
+                <td className={tdClass}>{s.method}</td>
+                <td className={tdClass}>{s.host}</td>
+                <td className={tdClass}>{s.path}</td>
+                <td className={tdClass}>{s.type}</td>
+                <td className={tdClass}>{s.size}</td>
               </tr>
             ))}
           </tbody>
@@ -67,7 +86,7 @@ function TableToolbar({ count }: { count: number }) {
       </button>
       <button
         type="button"
-        className="flex h-7 w-7 items-center justify-center rounded text-[var(--text-secondary)] hover:bg-white/5"
+        className="flex h-7 w-7 items-center justify-center rounded text-nova-secondary hover:bg-white/5"
       >
         <Trash2 size={14} />
       </button>
@@ -75,13 +94,13 @@ function TableToolbar({ count }: { count: number }) {
       <div className="flex flex-1 items-center gap-2">
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded border border-white/5 bg-white/5 px-2.5 py-1 text-[11px] text-[var(--text-secondary)]"
+          className="flex items-center gap-1.5 rounded border border-white/5 bg-white/5 px-2.5 py-1 text-[11px] text-nova-secondary"
         >
           <Filter size={11} />
           Filter
         </button>
       </div>
-      <span className="text-[10px] text-[var(--text-tertiary)]">
+      <span className="text-[10px] text-nova-tertiary">
         Sessions: {count} / Capturing
       </span>
     </div>

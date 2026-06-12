@@ -16,15 +16,19 @@ export function InspectorPanel() {
   const [sub, setSub] = useState<SubTab>("headers");
 
   return (
-    <Panel className="inspector-panel">
+    <Panel className="w-[400px] shrink-0">
       {/* Main Tabs */}
-      <div className="tabs-header">
+      <div className="h-11 border-b border-white/[0.08] flex px-1.5 gap-0.5 items-end">
         {INSPECTOR_TABS.map((t) => (
           <button
             type="button"
             key={t}
             onClick={() => setTab(t)}
-            className={`inspector-tab ${tab === t ? "active" : ""}`}
+            className={`py-1.5 px-3.5 rounded-t-lg text-xs cursor-pointer transition-all duration-200 bg-transparent border-none font-[inherit] ${
+              tab === t
+                ? "bg-white/[0.08] text-nova-primary border-b-2 border-white/30"
+                : "text-nova-tertiary"
+            }`}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
@@ -38,7 +42,11 @@ export function InspectorPanel() {
             type="button"
             key={st}
             onClick={() => setSub(st)}
-            className={`sub-tab ${sub === st ? "active" : ""}`}
+            className={`py-1.5 px-3 text-[10px] cursor-pointer bg-transparent border-none border-b-2 font-[inherit] uppercase tracking-[0.05em] ${
+              sub === st
+                ? "text-nova-primary border-b-white/40"
+                : "text-nova-tertiary border-b-transparent"
+            }`}
           >
             {st}
           </button>
@@ -46,12 +54,12 @@ export function InspectorPanel() {
       </div>
 
       {/* Content */}
-      <div className="inspector-content">
+      <div className="flex-1 p-3.5 overflow-y-auto">
         {sub === "headers" && (
           <KVRows groups={[MOCK_REQUEST_GENERAL, MOCK_REQUEST_HEADERS]} />
         )}
         {sub !== "headers" && (
-          <div className="flex h-full items-center justify-center text-[var(--text-tertiary)] text-xs">
+          <div className="flex h-full items-center justify-center text-nova-tertiary text-xs">
             {sub.charAt(0).toUpperCase() + sub.slice(1)} panel
           </div>
         )}

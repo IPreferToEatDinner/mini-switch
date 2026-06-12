@@ -9,6 +9,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        nova: {
+          primary: "#eaeaea",
+          secondary: "#9aa0a6",
+          tertiary: "#5f6368",
+          green: "#98c379",
+          yellow: "#d19a66",
+          red: "#e06c75",
+          blue: "#61afef",
+          purple: "#c678dd",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
