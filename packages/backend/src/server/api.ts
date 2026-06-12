@@ -12,10 +12,10 @@ import {
   getLogCount,
   getSession,
   getSessionCount,
-  insertLog,
   queryLogs,
   querySessions,
 } from "../store/db.js";
+import { logger } from "../logger.js";
 
 const API_PORT = 6678;
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -177,14 +177,16 @@ export function startApiServer(): void {
     console.log(
       `[api] Dashboard API listening on http://127.0.0.1:${API_PORT}`,
     );
-    insertLog({
-      level: "info",
+    logger.info({
       category: "api",
-      message: `API server started on port ${API_PORT}`,
+      message: `Server started on port ${API_PORT}`,
     });
   });
 
   server.on("error", (err) => {
-    console.error(`[api] server error:`, err.message);
+    logger.error({
+      category: "api",
+      message: `Server error: ${err.message}`,
+    });
   });
 }

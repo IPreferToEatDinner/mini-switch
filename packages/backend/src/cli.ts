@@ -1,12 +1,12 @@
 import { createServer } from "node:net";
+import { logger } from "./logger.js";
 import { parseHttpRequest } from "./proxy/http-parser.js";
 import { createHttpProxy } from "./proxy/http-proxy.js";
 import { loadRules, matchActions } from "./proxy/rule-engine.js";
 import { startApiServer } from "./server/api.js";
 import {
-  insertLog,
   insertSession,
-  vacuum
+  vacuum,
 } from "./store/db.js";
 import type { ProxyConfig, ProxyRule } from "./types.js";
 
@@ -30,9 +30,7 @@ function startServer(config: ProxyConfig, rules: ProxyRule[]): void {
     let proxied = false;
 
     clientSocket.on("error", (err) => {
-      console.error("[proxy] client socket error:", err.message);
-      insertLog({
-        level: "error",
+      logger.error({
         category: "proxy",
         message: `Client socket error: ${err.message}`,
       });
@@ -57,15 +55,14 @@ function startServer(config: ProxyConfig, rules: ProxyRule[]): void {
 
       if (request.method === "CONNECT") {
         // CONNECT 隧道是 Phase 3 的内容，目前先拒绝
-        const msg = "[proxy] CONNECT rejected (HTTPS not implemented yet)";
-        console.log(msg);
-        insertLog({ level: "warn", category: "proxy", message: msg });
+        logger.warn({
+          category: "proxy",
+          message: "CONNECT rejected (HTTPS not implemented yet)",
+        });
         clientSocket.write("HTTP/1.1 405 Method Not Allowed\r\n\r\n");
         clientSocket.end();
         return;
       }
-
-      console.log(`[proxy] ← client ${request.method} ${request.url.href}`);
 
       proxied = true;
       const actions = matchActions(request, rules);
@@ -83,8 +80,7 @@ function startServer(config: ProxyConfig, rules: ProxyRule[]): void {
           : undefined,
       });
 
-      insertLog({
-        level: "info",
+      logger.info({
         category: "proxy",
         message: `← client ${request.method} ${request.url.href}`,
         sessionId,
@@ -99,24 +95,24 @@ function startServer(config: ProxyConfig, rules: ProxyRule[]): void {
   });
 
   server.listen(config.port, config.host, () => {
-    const msg = `
+    const banner = `
   mini-switch v1.0.0
   ────────────────────────────────────
   Proxy:      http://${config.host}:${config.port}
   Dashboard:  http://${config.host}:6678
   `;
-    console.log(msg);
-    insertLog({
-      level: "info",
+    logger.info({
       category: "proxy",
-      message: `Proxy server started on ${config.host}:${config.port}`,
+      message: banner,
+    });
+    logger.info({
+      category: "proxy",
+      message: `Server started on ${config.host}:${config.port}`,
     });
   });
 
   server.on("error", (err) => {
-    console.error("[proxy] server error:", err.message);
-    insertLog({
-      level: "error",
+    logger.error({
       category: "proxy",
       message: `Server error: ${err.message}`,
     });

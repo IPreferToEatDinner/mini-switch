@@ -7,7 +7,7 @@ import type {
   RuleAction,
   RuleConfig,
 } from "../types.js";
-import { insertLog } from "../store/db.js";
+import { logger } from "../logger.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -29,20 +29,23 @@ export function loadRules(filePath?: string): ProxyRule[] {
     const raw = readFileSync(path, "utf-8");
     const config: RuleConfig = JSON.parse(raw);
     const enabled = (config.rules ?? []).filter((r) => r.enabled !== false);
-    const msg = `[rules] loaded ${enabled.length}/${config.rules.length} rules from ${path}`;
-    console.log(msg);
-    insertLog({ level: "info", category: "rule-engine", message: msg });
+    logger.info({
+      category: "rule-engine",
+      message: `Loaded ${enabled.length}/${config.rules.length} rules from ${path}`,
+    });
     return enabled;
   } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      const msg = `[rules] no config file at ${path}, running without rules`;
-      console.log(msg);
-      insertLog({ level: "warn", category: "rule-engine", message: msg });
+      logger.warn({
+        category: "rule-engine",
+        message: `No config file at ${path}, running without rules`,
+      });
       return [];
     }
-    const msg = `[rules] failed to load ${path}: ${(err as Error).message}`;
-    console.error(msg);
-    insertLog({ level: "error", category: "rule-engine", message: msg });
+    logger.error({
+      category: "rule-engine",
+      message: `Failed to load ${path}: ${(err as Error).message}`,
+    });
     return [];
   }
 }
@@ -61,9 +64,10 @@ export function matchActions(
 
   for (const rule of rules) {
     if (matchCondition(request, rule.match)) {
-      const msg = `[rules] "${rule.name}" matched ${request.method} ${request.url.href}`;
-      console.log(msg);
-      insertLog({ level: "info", category: "rule-engine", message: msg });
+      logger.info({
+        category: "rule-engine",
+        message: `"${rule.name}" matched ${request.method} ${request.url.href}`,
+      });
       allActions.push(...rule.actions);
     }
   }

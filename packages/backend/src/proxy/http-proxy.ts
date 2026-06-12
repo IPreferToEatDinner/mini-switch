@@ -6,7 +6,8 @@ import type {
   ParseResponseNeedClose,
   RuleAction,
 } from "../types.js";
-import { insertLog, updateSession } from "../store/db.js";
+import { logger } from "../logger.js";
+import { updateSession } from "../store/db.js";
 import { compileActionPlan } from "./action-pipeline.js";
 import { parseHttpResponse } from "./http-parser.js";
 
@@ -34,15 +35,8 @@ export function createHttpProxy({
 }: CreateHttpProxyOptions): void {
   const startTime = Date.now();
 
-  // Helper: log to console + db
-  const dbLog = (
-    level: "info" | "warn" | "error",
-    category: string,
-    message: string,
-  ) => {
-    if (level === "error") console.error(`[${category}] ${message}`);
-    else console.log(`[${category}] ${message}`);
-    insertLog({ level, category, message, sessionId });
+  const log = (level: "info" | "warn" | "error", message: string) => {
+    logger[level]({ category: "proxy", message, sessionId });
   };
 
   // ----- 0. 编译管线 -----
@@ -50,15 +44,13 @@ export function createHttpProxy({
 
   // mock: 直接返回，不连目标
   if (plan.mock) {
-    dbLog(
+    log(
       "info",
-      "proxy",
       `← mock ${plan.mock.statusCode} ${plan.mock.statusText} (${plan.mock.body.length}B)`,
     );
     clientSocket.write(plan.mock.raw);
-    dbLog(
+    log(
       "info",
-      "proxy",
       `→ client ${plan.mock.statusCode} ${plan.mock.statusText}`,
     );
     clientSocket.end();
@@ -82,15 +74,13 @@ export function createHttpProxy({
   if (plan.redirectUrl) {
     try {
       targetUrl = new URL(plan.redirectUrl);
-      dbLog(
+      log(
         "info",
-        "proxy",
         `redirect: ${transformed.url.href} → ${targetUrl.href}`,
       );
     } catch {
-      dbLog(
+      log(
         "error",
-        "proxy",
         `invalid redirect URL: ${plan.redirectUrl}`,
       );
       clientSocket.write(
@@ -133,9 +123,8 @@ export function createHttpProxy({
     });
 
     targetSocket.on("error", (err) => {
-      dbLog(
+      log(
         "error",
-        "proxy",
         `target error (${targetUrl.hostname}:${port}): ${err.message}`,
       );
       updateSession(sessionId, {
@@ -146,7 +135,7 @@ export function createHttpProxy({
     });
 
     targetSocket.on("connect", () => {
-      dbLog("info", "proxy", `→ target ${method} ${path} ${httpVersion}`);
+      log("info", `→ target ${method} ${path} ${httpVersion}`);
       targetSocket.write(forwardRaw);
       clientSocket.pipe(targetSocket);
     });
@@ -163,9 +152,8 @@ export function createHttpProxy({
       const transformed = plan.transformResponse(response);
 
       const contentType = transformed.headers["content-type"] ?? "";
-      dbLog(
+      log(
         "info",
-        "proxy",
         `← target ${transformed.statusCode} ${transformed.statusText} (${transformed.body.length}B) ${contentType}`,
       );
 
@@ -181,9 +169,8 @@ export function createHttpProxy({
 
       const doSend = () => {
         clientSocket.write(transformed.raw);
-        dbLog(
+        log(
           "info",
-          "proxy",
           `→ client ${transformed.statusCode} ${transformed.statusText}`,
         );
         clientSocket.end();
@@ -191,9 +178,8 @@ export function createHttpProxy({
       };
 
       if (plan.responseDelay && plan.responseDelay > 0) {
-        dbLog(
+        log(
           "info",
-          "proxy",
           `delaying response by ${plan.responseDelay}ms`,
         );
         setTimeout(doSend, plan.responseDelay);
@@ -238,7 +224,7 @@ export function createHttpProxy({
   };
 
   if (plan.requestDelay && plan.requestDelay > 0) {
-    dbLog("info", "proxy", `delaying request by ${plan.requestDelay}ms`);
+    log("info", `delaying request by ${plan.requestDelay}ms`);
     setTimeout(connectToTarget, plan.requestDelay);
   } else {
     connectToTarget();

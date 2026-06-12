@@ -12,7 +12,7 @@ import type {
   ResHeadersAction,
   RuleAction,
 } from "../types.js";
-import { insertLog } from "../store/db.js";
+import { logger } from "../logger.js";
 
 /**
  * 动作管线 —— 将 actions 数组编译为 ActionPlan。
@@ -67,9 +67,7 @@ export function compileActionPlan(actions: RuleAction[]): ActionPlan {
       case "redirect": {
         // 最后一条 redirect 生效（覆盖之前的）
         redirectUrl = action.url;
-        console.log(`[pipeline] redirect → ${action.url}`);
-        insertLog({
-          level: "info",
+        logger.info({
           category: "pipeline",
           message: `redirect → ${action.url}`,
         });
@@ -165,9 +163,7 @@ function applyModifyBody(
       const regex = new RegExp(action.find, "g");
       newBody = response.body.replace(regex, action.replace);
     } catch {
-      console.error(`[pipeline] invalid regex: /${action.find}/`);
-      insertLog({
-        level: "error",
+      logger.error({
         category: "pipeline",
         message: `invalid regex: /${action.find}/`,
       });
@@ -181,9 +177,7 @@ function applyModifyBody(
 
   const oldLen = Buffer.byteLength(response.body);
   const newLen = Buffer.byteLength(newBody);
-  console.log(`[pipeline] modifyBody: ${oldLen}B → ${newLen}B`);
-  insertLog({
-    level: "info",
+  logger.info({
     category: "pipeline",
     message: `modifyBody: ${oldLen}B → ${newLen}B`,
   });
@@ -208,17 +202,13 @@ function applyResHeaders(
     const lowerKey = key.toLowerCase();
     if (value === null) {
       delete newHeaders[lowerKey];
-      console.log(`[pipeline] resHeaders: removed "${lowerKey}"`);
-      insertLog({
-        level: "info",
+      logger.info({
         category: "pipeline",
         message: `resHeaders: removed "${lowerKey}"`,
       });
     } else {
       newHeaders[lowerKey] = value;
-      console.log(`[pipeline] resHeaders: set "${lowerKey}" = "${value}"`);
-      insertLog({
-        level: "info",
+      logger.info({
         category: "pipeline",
         message: `resHeaders: set "${lowerKey}" = "${value}"`,
       });
@@ -257,17 +247,13 @@ function applyReqHeaders(
     const lowerKey = key.toLowerCase();
     if (value === null) {
       delete newHeaders[lowerKey];
-      console.log(`[pipeline] reqHeaders: removed "${lowerKey}"`);
-      insertLog({
-        level: "info",
+      logger.info({
         category: "pipeline",
         message: `reqHeaders: removed "${lowerKey}"`,
       });
     } else {
       newHeaders[lowerKey] = value;
-      console.log(`[pipeline] reqHeaders: set "${lowerKey}" = "${value}"`);
-      insertLog({
-        level: "info",
+      logger.info({
         category: "pipeline",
         message: `reqHeaders: set "${lowerKey}" = "${value}"`,
       });
@@ -292,9 +278,7 @@ function applyReqBody(
       const regex = new RegExp(action.find, "g");
       newBody = request.body.replace(regex, action.replace);
     } catch {
-      console.error(`[pipeline] reqBody: invalid regex /${action.find}/`);
-      insertLog({
-        level: "error",
+      logger.error({
         category: "pipeline",
         message: `reqBody: invalid regex /${action.find}/`,
       });
@@ -308,9 +292,7 @@ function applyReqBody(
 
   const oldLen = Buffer.byteLength(request.body);
   const newLen = Buffer.byteLength(newBody);
-  console.log(`[pipeline] reqBody: ${oldLen}B → ${newLen}B`);
-  insertLog({
-    level: "info",
+  logger.info({
     category: "pipeline",
     message: `reqBody: ${oldLen}B → ${newLen}B`,
   });
