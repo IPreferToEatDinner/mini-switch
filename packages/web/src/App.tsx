@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  fetchLogs,
-  fetchSessions,
   clearLogs as clearApiLogs,
   clearSessions as clearApiSessions,
+  fetchLogs,
+  fetchSessions,
   type LogRecord,
   type SessionRecord,
 } from "./api/client";
@@ -27,16 +27,17 @@ function formatLog(record: LogRecord) {
 
 function formatSession(record: SessionRecord) {
   const type = record.contentType
-    ? record.contentType.split("/").pop()?.split(";")[0] ?? "--"
+    ? (record.contentType.split("/").pop()?.split(";")[0] ?? "--")
     : "--";
 
-  const size = record.responseSize != null
-    ? record.responseSize < 1024
-      ? `${record.responseSize} B`
-      : record.responseSize < 1024 * 1024
-        ? `${(record.responseSize / 1024).toFixed(1)} KB`
-        : `${(record.responseSize / (1024 * 1024)).toFixed(1)} MB`
-    : "--";
+  const size =
+    record.responseSize != null
+      ? record.responseSize < 1024
+        ? `${record.responseSize} B`
+        : record.responseSize < 1024 * 1024
+          ? `${(record.responseSize / 1024).toFixed(1)} KB`
+          : `${(record.responseSize / (1024 * 1024)).toFixed(1)} MB`
+      : "--";
 
   return {
     id: record.id,
@@ -57,9 +58,9 @@ export function App() {
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [selectedId, setSelectedId] = useState<number | undefined>();
-  const [selectedSession, setSelectedSession] = useState<
-    SessionRecord | null
-  >(null);
+  const [selectedSession, setSelectedSession] = useState<SessionRecord | null>(
+    null,
+  );
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadData = useCallback(async () => {

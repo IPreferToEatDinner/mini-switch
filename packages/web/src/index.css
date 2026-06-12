@@ -1,7 +1,4 @@
-/* biome-ignore-all lint: Tailwind directives are not standard CSS at-rules */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ===== Nebula Proxy 设计令牌 ===== */
 :root {
