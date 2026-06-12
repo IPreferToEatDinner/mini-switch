@@ -18,15 +18,15 @@ export function InspectorPanel() {
   return (
     <Panel className="w-[400px] shrink-0">
       {/* Main Tabs */}
-      <div className="h-11 border-b border-white/[0.08] flex px-1.5 gap-0.5 items-end">
+      <div className="flex h-11 items-end gap-0.5 border-white/[0.08] border-b px-1.5">
         {INSPECTOR_TABS.map((t) => (
           <button
             type="button"
             key={t}
             onClick={() => setTab(t)}
-            className={`py-1.5 px-3.5 rounded-t-lg text-xs cursor-pointer transition-all duration-200 bg-transparent border-none font-[inherit] ${
+            className={`cursor-pointer rounded-t-lg border-none bg-transparent px-3.5 py-1.5 font-[inherit] text-xs transition-all duration-200 ${
               tab === t
-                ? "bg-white/[0.08] text-nova-primary border-b-2 border-white/30"
+                ? "border-white/30 border-b-2 bg-white/[0.08] text-nova-primary"
                 : "text-nova-tertiary"
             }`}
           >
@@ -42,10 +42,10 @@ export function InspectorPanel() {
             type="button"
             key={st}
             onClick={() => setSub(st)}
-            className={`py-1.5 px-3 text-[10px] cursor-pointer bg-transparent border-none border-b-2 font-[inherit] uppercase tracking-[0.05em] ${
+            className={`cursor-pointer border-b-2 border-none bg-transparent px-3 py-1.5 font-[inherit] text-[10px] uppercase tracking-[0.05em] ${
               sub === st
-                ? "text-nova-primary border-b-white/40"
-                : "text-nova-tertiary border-b-transparent"
+                ? "border-b-white/40 text-nova-primary"
+                : "border-b-transparent text-nova-tertiary"
             }`}
           >
             {st}
@@ -54,7 +54,7 @@ export function InspectorPanel() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-3.5 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-3.5">
         {sub === "headers" && (
           <KVRows groups={[MOCK_REQUEST_GENERAL, MOCK_REQUEST_HEADERS]} />
         )}

@@ -21,7 +21,7 @@ export function TerminalLog({ logs }: TerminalLogProps) {
 
   return (
     <Panel className="h-[180px] bg-black/20">
-      <div className="py-1.5 px-3.5 text-[10px] text-nova-tertiary uppercase border-b border-white/[0.08] flex justify-between items-center tracking-[0.05em]">
+      <div className="flex items-center justify-between border-white/[0.08] border-b px-3.5 py-1.5 text-[10px] text-nova-tertiary uppercase tracking-[0.05em]">
         <span>Proxy Logs</span>
         <div className="flex items-center gap-2">
           <span className="cursor-pointer text-[10px] text-nova-tertiary hover:text-nova-primary">
@@ -30,10 +30,10 @@ export function TerminalLog({ logs }: TerminalLogProps) {
           <ChevronDown size={11} className="text-nova-tertiary" />
         </div>
       </div>
-      <div className="py-2.5 px-3.5 font-mono text-[11px] text-nova-secondary overflow-y-auto h-[calc(100%-30px)]">
+      <div className="h-[calc(100%-30px)] overflow-y-auto px-3.5 py-2.5 font-mono text-[11px] text-nova-secondary">
         {logs.map((log) => (
           <div key={log.id} className="mb-[3px] leading-[1.5]">
-            <span className="text-nova-tertiary mr-2">[{log.time}]</span>
+            <span className="mr-2 text-nova-tertiary">[{log.time}]</span>
             <span className={levelClass(log.level)}>
               {log.level.toUpperCase()}
             </span>{" "}

@@ -27,7 +27,7 @@ export function NavBar({
   return (
     <Panel className="!flex-row flex w-[280px] shrink-0">
       {/* 图标导航 */}
-      <div className="flex  flex-col  w-[54px] items-center gap-5 border-white/[0.08] border-r pt-5">
+      <div className="flex w-[54px] flex-col items-center gap-5 border-white/[0.08] border-r pt-5">
         {ACTIVITY_ITEMS.map((item) => (
           <IconButton
             key={item.id}

@@ -24,7 +24,7 @@ export function SessionsTable({
     <Panel className="flex-1">
       <TableToolbar count={sessions.length} />
       <div className="flex-1 overflow-auto">
-        <table className="w-full border-collapse text-xs text-left">
+        <table className="w-full border-collapse text-left text-xs">
           <thead>
             <tr>
               <th className={thClass} style={{ width: 50 }}>
@@ -53,7 +53,7 @@ export function SessionsTable({
               <tr
                 key={s.id}
                 onClick={() => onSelect?.(s)}
-                className={`border-b border-white/[0.03] cursor-pointer transition-colors duration-100 hover:bg-white/[0.03] ${
+                className={`cursor-pointer border-white/[0.03] border-b transition-colors duration-100 hover:bg-white/[0.03] ${
                   s.active || s.id === activeId ? "bg-white/[0.08]" : ""
                 }`}
               >

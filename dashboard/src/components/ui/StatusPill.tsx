@@ -15,7 +15,7 @@ const statusStyle = (code: number) => {
 export function StatusPill({ status }: StatusPillProps) {
   return (
     <span
-      className={`px-1.5 py-px rounded-[3px] font-semibold text-[10px] font-mono bg-black/30 border ${statusStyle(status)}`}
+      className={`rounded-[3px] border bg-black/30 px-1.5 py-px font-mono font-semibold text-[10px] ${statusStyle(status)}`}
     >
       {status} OK
     </span>
