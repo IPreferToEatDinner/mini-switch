@@ -1,0 +1,81 @@
+{
+  "rules": [
+    {
+      "name": "[global] strip accept-encoding on all requests",
+      "enabled": false,
+      "match": { "hostname": "*", "path": "**" },
+      "actions": [
+        { "type": "reqHeaders", "set": { "accept-encoding": "identity" } }
+      ]
+    },
+
+    {
+      "name": "[global] remove cache headers for all responses",
+      "enabled": false,
+      "match": { "hostname": "*", "path": "**" },
+      "actions": [
+        { "type": "resHeaders", "set": { "cache-control": null, "etag": "no-cache" } }
+      ]
+    },
+
+    {
+      "name": "mock user api (combines with global rules above)",
+      "enabled": false,
+      "match": { "method": "GET", "hostname": "api.example.com", "path": "/user/*" },
+      "actions": [
+        {
+          "type": "mock",
+          "statusCode": 200,
+          "headers": { "content-type": "application/json" },
+          "body": "{\"name\": \"mocked user\", \"id\": 1}"
+        }
+      ]
+    },
+
+    {
+      "name": "simulate 3G on all images",
+      "enabled": false,
+      "match": { "hostname": "*", "path": "*.png" },
+      "actions": [{ "type": "delay", "ms": 3000, "phase": "response" }]
+    },
+
+    {
+      "name": "add CORS + inject script for all HTML",
+      "enabled": false,
+      "match": { "hostname": "*", "path": "*.html" },
+      "actions": [
+        { "type": "delay", "ms": 500, "phase": "request" },
+        { "type": "resHeaders", "set": { "access-control-allow-origin": "*" } },
+        { "type": "modifyBody", "find": "</body>", "replace": "<script>console.log('injected')</script></body>" }
+      ]
+    },
+
+    {
+      "name": "add auth token for all POST requests",
+      "enabled": false,
+      "match": { "method": "POST", "hostname": "api.example.com", "path": "/**" },
+      "actions": [
+        { "type": "reqHeaders", "set": { "authorization": "Bearer test-token" } },
+        { "type": "reqBody", "find": "\"env\":\"production\"", "replace": "\"env\":\"staging\"" }
+      ]
+    },
+
+    {
+      "name": "redirect CDN to local dev server",
+      "enabled": false,
+      "match": { "hostname": "cdn.example.com", "path": "/assets/**" },
+      "actions": [
+        { "type": "redirect", "url": "http://localhost:3000/assets/" }
+      ]
+    },
+
+    {
+      "name": "regex: replace all 4-digit numbers on example.com",
+      "enabled": false,
+      "match": { "hostname": "example.com", "path": "/" },
+      "actions": [
+        { "type": "modifyBody", "find": "(\\d{4})", "replace": "[$1]", "findType": "regex" }
+      ]
+    }
+  ]
+}

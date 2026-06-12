@@ -1,7 +1,8 @@
 import { createServer } from "node:net";
 import { parseHttpRequest } from "./proxy/http-parser.js";
 import { createHttpProxy } from "./proxy/http-proxy.js";
-import type { ProxyConfig } from "./types.js";
+import { loadRules, matchActions } from "./proxy/rule-engine.js";
+import type { ProxyConfig, ProxyRule } from "./types.js";
 
 const DEFAULT_PROXY_PORT = 6677;
 
@@ -12,7 +13,7 @@ function getConfig(): ProxyConfig {
   };
 }
 
-function startServer(config: ProxyConfig): void {
+function startServer(config: ProxyConfig, rules: ProxyRule[]): void {
   const server = createServer((clientSocket) => {
     // 每个连接有自己的缓冲区，用来从 TCP 字节流中拼出完整请求
     let buffer = Buffer.alloc(0);
@@ -53,7 +54,8 @@ function startServer(config: ProxyConfig): void {
       console.log(`[proxy] ← client ${request.method} ${request.url.href}`);
 
       proxied = true;
-      createHttpProxy({ request, clientSocket });
+      const actions = matchActions(request, rules);
+      createHttpProxy({ request, clientSocket, actions });
     });
 
     clientSocket.on("end", () => {
@@ -76,4 +78,5 @@ function startServer(config: ProxyConfig): void {
 }
 
 const config = getConfig();
-startServer(config);
+const rules = loadRules();
+startServer(config, rules);
