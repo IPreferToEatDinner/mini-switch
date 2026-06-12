@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 interface StatusPillProps {
   status: number;
 }
@@ -15,7 +17,10 @@ const statusStyle = (code: number) => {
 export function StatusPill({ status }: StatusPillProps) {
   return (
     <span
-      className={`rounded-[3px] border bg-black/30 px-1.5 py-px font-mono font-semibold text-[10px] ${statusStyle(status)}`}
+      className={cn(
+        "rounded-[3px] border bg-black/30 px-1.5 py-px font-mono text-[10px] font-semibold",
+        statusStyle(status),
+      )}
     >
       {status} OK
     </span>

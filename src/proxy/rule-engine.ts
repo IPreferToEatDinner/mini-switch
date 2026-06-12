@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { ParsedHttpRequest, ProxyRule, RuleAction, RuleConfig } from "../types.js";
+import type {
+  ParsedHttpRequest,
+  ProxyRule,
+  RuleAction,
+  RuleConfig,
+} from "../types.js";
 
 /**
  * 规则引擎 —— 加载规则 + URL 匹配。
@@ -47,7 +52,9 @@ export function matchActions(
 
   for (const rule of rules) {
     if (matchCondition(request, rule.match)) {
-      console.log(`[rules] "${rule.name}" matched ${request.method} ${request.url.href}`);
+      console.log(
+        `[rules] "${rule.name}" matched ${request.method} ${request.url.href}`,
+      );
       allActions.push(...rule.actions);
     }
   }
@@ -55,9 +62,13 @@ export function matchActions(
   return allActions.length > 0 ? allActions : null;
 }
 
-function matchCondition(request: ParsedHttpRequest, match: ProxyRule["match"]): boolean {
+function matchCondition(
+  request: ParsedHttpRequest,
+  match: ProxyRule["match"],
+): boolean {
   if (match.method && match.method !== "*") {
-    if (request.method.toUpperCase() !== match.method.toUpperCase()) return false;
+    if (request.method.toUpperCase() !== match.method.toUpperCase())
+      return false;
   }
 
   if (match.hostname && match.hostname !== "*") {

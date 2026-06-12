@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import {
   ACTIVITY_ITEMS,
@@ -25,9 +26,9 @@ export function NavBar({
   onSelectDomain,
 }: NavBarProps) {
   return (
-    <Panel className="!flex-row flex w-[280px] shrink-0">
+    <Panel className="flex w-[280px] shrink-0 !flex-row">
       {/* 图标导航 */}
-      <div className="flex w-[54px] flex-col items-center gap-5 border-white/[0.08] border-r pt-5">
+      <div className="flex w-[54px] flex-col items-center gap-5 border-r border-white/[0.08] pt-5">
         {ACTIVITY_ITEMS.map((item) => (
           <IconButton
             key={item.id}
@@ -36,7 +37,7 @@ export function NavBar({
             onClick={() => onChange(item.id)}
           />
         ))}
-        <div className="mt-auto mb-4">
+        <div className="mb-4 mt-auto">
           <IconButton
             item={ACTIVITY_SETTINGS}
             active={false}
@@ -47,7 +48,7 @@ export function NavBar({
 
       {/* 域名侧栏 */}
       <div className="flex flex-1 flex-col">
-        <div className="flex h-[54px] items-center border-white/[0.08] border-b px-4 font-semibold text-[11px] text-nova-secondary uppercase tracking-[0.02em]">
+        <div className="flex h-[54px] items-center border-b border-white/[0.08] px-4 text-[11px] font-semibold uppercase tracking-[0.02em] text-nova-secondary">
           mini-switch
         </div>
 
@@ -56,7 +57,7 @@ export function NavBar({
           <input
             type="text"
             placeholder="Filter domain..."
-            className="w-full border-none bg-transparent font-[inherit] text-nova-primary text-xs outline-none placeholder:text-nova-tertiary"
+            className="w-full border-none bg-transparent font-[inherit] text-xs text-nova-primary outline-none placeholder:text-nova-tertiary"
           />
         </div>
 
@@ -75,15 +76,15 @@ export function NavBar({
                 type="button"
                 key={domain.name}
                 onClick={() => onSelectDomain?.(domain.name)}
-                className={`flex w-full cursor-pointer items-center gap-2 rounded p-2 text-left text-xs ${
+                className={cn(
+                  "flex w-full cursor-pointer items-center gap-2 rounded p-2 text-left text-xs",
                   isAllTraffic || isSelected
                     ? "text-nova-primary"
-                    : "text-nova-secondary"
-                } ${
+                    : "text-nova-secondary",
                   isSelected && !isAllTraffic
                     ? "bg-white/5"
-                    : "hover:bg-white/5"
-                }`}
+                    : "hover:bg-white/5",
+                )}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -131,18 +132,17 @@ function IconButton({
   active: boolean;
   onClick: () => void;
 }) {
-  const baseClasses =
-    "w-9 h-9 rounded-[10px] flex items-center justify-center text-nova-secondary cursor-pointer transition-all duration-200";
-  const activeClasses = active
-    ? "text-nova-primary bg-white/[0.08] shadow-[0_0_10px_rgba(0,0,0,0.2)]"
-    : "hover:text-nova-primary hover:bg-white/[0.03]";
-
   return (
     <button
       type="button"
       title={item.label}
       onClick={onClick}
-      className={`${baseClasses} ${activeClasses}`}
+      className={cn(
+        "flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] text-nova-secondary transition-all duration-200",
+        active
+          ? "bg-white/[0.08] text-nova-primary shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+          : "hover:bg-white/[0.03] hover:text-nova-primary",
+      )}
     >
       <item.icon size={18} />
     </button>

@@ -14,14 +14,21 @@
       "enabled": false,
       "match": { "hostname": "*", "path": "**" },
       "actions": [
-        { "type": "resHeaders", "set": { "cache-control": null, "etag": "no-cache" } }
+        {
+          "type": "resHeaders",
+          "set": { "cache-control": null, "etag": "no-cache" }
+        }
       ]
     },
 
     {
       "name": "mock user api (combines with global rules above)",
       "enabled": false,
-      "match": { "method": "GET", "hostname": "api.example.com", "path": "/user/*" },
+      "match": {
+        "method": "GET",
+        "hostname": "api.example.com",
+        "path": "/user/*"
+      },
       "actions": [
         {
           "type": "mock",
@@ -46,17 +53,32 @@
       "actions": [
         { "type": "delay", "ms": 500, "phase": "request" },
         { "type": "resHeaders", "set": { "access-control-allow-origin": "*" } },
-        { "type": "modifyBody", "find": "</body>", "replace": "<script>console.log('injected')</script></body>" }
+        {
+          "type": "modifyBody",
+          "find": "</body>",
+          "replace": "<script>console.log('injected')</script></body>"
+        }
       ]
     },
 
     {
       "name": "add auth token for all POST requests",
       "enabled": false,
-      "match": { "method": "POST", "hostname": "api.example.com", "path": "/**" },
+      "match": {
+        "method": "POST",
+        "hostname": "api.example.com",
+        "path": "/**"
+      },
       "actions": [
-        { "type": "reqHeaders", "set": { "authorization": "Bearer test-token" } },
-        { "type": "reqBody", "find": "\"env\":\"production\"", "replace": "\"env\":\"staging\"" }
+        {
+          "type": "reqHeaders",
+          "set": { "authorization": "Bearer test-token" }
+        },
+        {
+          "type": "reqBody",
+          "find": "\"env\":\"production\"",
+          "replace": "\"env\":\"staging\""
+        }
       ]
     },
 
@@ -74,7 +96,12 @@
       "enabled": false,
       "match": { "hostname": "example.com", "path": "/" },
       "actions": [
-        { "type": "modifyBody", "find": "(\\d{4})", "replace": "[$1]", "findType": "regex" }
+        {
+          "type": "modifyBody",
+          "find": "(\\d{4})",
+          "replace": "[$1]",
+          "findType": "regex"
+        }
       ]
     }
   ]

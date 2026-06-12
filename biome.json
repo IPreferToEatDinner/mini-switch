@@ -8,6 +8,14 @@
   "files": {
     "ignoreUnknown": false
   },
+  "overrides": [
+    {
+      "includes": ["dashboard/**", "dist/**"],
+      "formatter": { "enabled": false },
+      "linter": { "enabled": false },
+      "assist": { "enabled": false }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",

@@ -21,7 +21,7 @@ export function TerminalLog({ logs }: TerminalLogProps) {
 
   return (
     <Panel className="h-[180px] bg-black/20">
-      <div className="flex items-center justify-between border-white/[0.08] border-b px-3.5 py-1.5 text-[10px] text-nova-tertiary uppercase tracking-[0.05em]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.05em] text-nova-tertiary">
         <span>Proxy Logs</span>
         <div className="flex items-center gap-2">
           <span className="cursor-pointer text-[10px] text-nova-tertiary hover:text-nova-primary">

@@ -133,11 +133,36 @@ export interface LogEntry {
 }
 
 export const MOCK_LOGS: LogEntry[] = [
-  { id: 1, time: "14:20:01", level: "info", text: "Proxy server listening on port 8899" },
-  { id: 2, time: "14:20:05", level: "info", text: "HTTPS decryption enabled for *.nebula.dev" },
-  { id: 3, time: "14:21:44", level: "warn", text: "Rule 'BlockAnalytics' applied to google-analytics.com" },
-  { id: 4, time: "14:22:10", level: "info", text: "New session established from 127.0.0.1:54321" },
-  { id: 5, time: "14:22:15", level: "info", text: "Intercepting POST /v1/telemetry/heartbeat" },
+  {
+    id: 1,
+    time: "14:20:01",
+    level: "info",
+    text: "Proxy server listening on port 8899",
+  },
+  {
+    id: 2,
+    time: "14:20:05",
+    level: "info",
+    text: "HTTPS decryption enabled for *.nebula.dev",
+  },
+  {
+    id: 3,
+    time: "14:21:44",
+    level: "warn",
+    text: "Rule 'BlockAnalytics' applied to google-analytics.com",
+  },
+  {
+    id: 4,
+    time: "14:22:10",
+    level: "info",
+    text: "New session established from 127.0.0.1:54321",
+  },
+  {
+    id: 5,
+    time: "14:22:15",
+    level: "info",
+    text: "Intercepting POST /v1/telemetry/heartbeat",
+  },
 ];
 
 // ===== Inspector =====

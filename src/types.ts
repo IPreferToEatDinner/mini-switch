@@ -114,9 +114,9 @@ export interface ProxyRule {
 }
 
 export interface RuleMatch {
-  method?: string;   // HTTP 方法，* 匹配全部
+  method?: string; // HTTP 方法，* 匹配全部
   hostname?: string; // glob，如 "*.example.com"
-  path?: string;     // glob，如 "/api/**"
+  path?: string; // glob，如 "/api/**"
 }
 
 /**

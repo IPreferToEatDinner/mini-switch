@@ -1,5 +1,6 @@
 import { Filter, Trash2 } from "lucide-react";
 import type { SessionItem } from "../../data/mock";
+import { cn } from "@/lib/utils";
 import { Panel } from "../ui/Panel";
 import { StatusPill } from "../ui/StatusPill";
 
@@ -53,9 +54,10 @@ export function SessionsTable({
               <tr
                 key={s.id}
                 onClick={() => onSelect?.(s)}
-                className={`cursor-pointer border-white/[0.03] border-b transition-colors duration-100 hover:bg-white/[0.03] ${
-                  s.active || s.id === activeId ? "bg-white/[0.08]" : ""
-                }`}
+                className={cn(
+                  "cursor-pointer border-b border-white/[0.03] transition-colors duration-100 hover:bg-white/[0.03]",
+                  (s.active || s.id === activeId) && "bg-white/[0.08]",
+                )}
               >
                 <td className={tdClass}>{s.id}</td>
                 <td className={tdClass}>
@@ -77,7 +79,7 @@ export function SessionsTable({
 
 function TableToolbar({ count }: { count: number }) {
   return (
-    <div className="flex h-11 items-center gap-3 border-white/5 border-b px-3">
+    <div className="flex h-11 items-center gap-3 border-b border-white/5 px-3">
       <button
         type="button"
         className="flex h-7 w-7 items-center justify-center rounded border border-red-500/30 bg-red-500/20 text-red-400"
