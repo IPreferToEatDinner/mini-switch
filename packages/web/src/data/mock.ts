@@ -170,6 +170,8 @@ export interface KVItem {
   key: string;
   value: string;
   valueColor?: string;
+  multiline?: boolean;
+  horizontal?: boolean;
 }
 
 export interface KVGroup {

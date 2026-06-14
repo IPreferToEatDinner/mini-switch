@@ -1,8 +1,9 @@
 import { cn } from "@/src/lib/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SessionRecord } from "../../api/client";
 import { KVRows } from "../ui/KVRows";
 import { Panel } from "../ui/Panel";
+import { CookieViewer } from "./CookieViewer";
 
 export type InspectorTab = "request" | "response" | "rules";
 export type SubTab = "headers" | "body" | "cookies" | "raw";
@@ -23,81 +24,31 @@ function parseJsonField(val: string | null): Record<string, string> | null {
   }
 }
 
-function formatSize(bytes: number | null): string {
-  if (bytes == null) return "--";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDuration(ms: number | null): string {
-  if (ms == null) return "--";
-  if (ms < 1000) return `${ms}ms`;
-  return `${(ms / 1000).toFixed(2)}s`;
-}
-
 /** 右侧检查器面板：请求/响应/规则 Tab + 子标签 */
 export function InspectorPanel({ session }: InspectorPanelProps) {
   const [tab, setTab] = useState<InspectorTab>("request");
   const [sub, setSub] = useState<SubTab>("headers");
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
   const reqHeaders = parseJsonField(session?.requestHeaders ?? null);
   const resHeaders = parseJsonField(session?.responseHeaders ?? null);
+  const headers = tab === "request" ? reqHeaders : resHeaders;
   const matchedRules = session?.matchedRules
     ? (JSON.parse(session.matchedRules) as string[])
     : null;
 
-  const generalItems = session
-    ? [
-        { key: "Request URL:", value: session.url },
-        { key: "Request Method:", value: session.method },
-        {
-          key: "Status Code:",
-          value: session.statusCode
-            ? `${session.statusCode} ${session.statusText ?? ""}`
-            : "pending...",
-          valueColor:
-            session.statusCode && session.statusCode < 300
-              ? "green"
-              : session.statusCode && session.statusCode >= 400
-                ? "red"
-                : undefined,
-        },
-        { key: "Host:", value: session.host },
-        {
-          key: "Response Size:",
-          value: formatSize(session.responseSize),
-        },
-        {
-          key: "Duration:",
-          value: formatDuration(session.durationMs),
-        },
-        {
-          key: "Content Type:",
-          value: session.contentType ?? "--",
-        },
-        {
-          key: "Error:",
-          value: session.error ?? "--",
-          valueColor: session.error ? "red" : undefined,
-        },
-      ]
+  const headerItems = headers
+    ? Object.entries(headers).map(([key, value]) => ({
+        key: `${key}:`,
+        value,
+        horizontal: true,
+      }))
     : [];
 
-  const headerItems =
-    tab === "request"
-      ? reqHeaders
-        ? Object.entries(reqHeaders).map(([key, value]) => ({
-            key: `${key}:`,
-            value,
-          }))
-        : []
-      : resHeaders
-        ? Object.entries(resHeaders).map(([key, value]) => ({
-            key: `${key}:`,
-            value,
-          }))
-        : [];
+  const headerTitle =
+    tab === "request" ? "Request Headers" : "Response Headers";
 
   return (
     <Panel className="h-full">
@@ -120,104 +71,111 @@ export function InspectorPanel({ session }: InspectorPanelProps) {
         ))}
       </div>
 
-      {/* Sub Tabs */}
-      <div className="flex border-b border-white/5 px-1.5">
-        {SUB_TABS.map((st) => (
-          <button
-            type="button"
-            key={st}
-            onClick={() => setSub(st)}
-            className={cn(
-              "cursor-pointer border-b-2 border-transparent bg-transparent px-2.5 py-1.5 font-[inherit] text-[10px] uppercase tracking-[0.05em] transition-colors",
-              sub === st
-                ? "border-white/30 text-nova-primary"
-                : "text-nova-tertiary hover:text-nova-secondary hover:bg-white/[0.03]",
-            )}
-          >
-            {st}
-          </button>
-        ))}
-      </div>
+      {/* Sub Tabs — only for request/response */}
+      {tab !== "rules" && (
+        <div className="flex border-b border-white/5 px-1.5">
+          {SUB_TABS.map((st) => (
+            <button
+              type="button"
+              key={st}
+              onClick={() => {
+                setSub(st);
+                if (st === "headers") scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                if (st === "body") bodyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className={cn(
+                "cursor-pointer border-b-2 border-transparent bg-transparent px-2.5 py-1.5 font-[inherit] text-[10px] uppercase tracking-[0.05em] transition-colors",
+                sub === st
+                  ? "border-white/30 text-nova-primary"
+                  : "text-nova-tertiary hover:text-nova-secondary hover:bg-white/[0.03]",
+              )}
+            >
+              {st}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3.5">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3.5">
         {!session && (
           <div className="flex h-full items-center justify-center text-xs text-nova-tertiary">
             Select a session to inspect
           </div>
         )}
 
-        {session && sub === "headers" && (
-          <KVRows
-            groups={[
-              { title: "General", items: generalItems },
-              ...(headerItems.length > 0
-                ? [
-                    {
-                      title:
-                        tab === "request"
-                          ? "Request Headers"
-                          : "Response Headers",
-                      items: headerItems,
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        )}
+        {session && tab !== "rules" && (
+          <>
+            {/* Headers + Body page (sub = headers | body) */}
+            {(sub === "headers" || sub === "body") && (
+              <>
+                <div>
+                  {headerItems.length > 0 && (
+                    <KVRows groups={[{ title: headerTitle, items: headerItems }]} />
+                  )}
+                </div>
+                <div ref={bodyRef} className="mt-4">
+                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-nova-tertiary">
+                    {tab === "request" ? "Request Body" : "Response Body"}
+                  </div>
+                  <div className="rounded-lg border border-white/[0.05] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-nova-secondary whitespace-pre-wrap break-all">
+                    {tab === "request"
+                      ? session.requestBody || (
+                          <span className="text-nova-tertiary italic">(empty)</span>
+                        )
+                      : session.responseBody || (
+                          <span className="text-nova-tertiary italic">(empty)</span>
+                        )}
+                  </div>
+                </div>
+              </>
+            )}
 
-        {session && sub === "body" && (
-          <div className="font-mono text-[11px] text-nova-secondary whitespace-pre-wrap break-all">
-            {tab === "request"
-              ? session.requestBody || (
-                  <span className="text-nova-tertiary italic">(empty)</span>
-                )
-              : session.responseBody || (
-                  <span className="text-nova-tertiary italic">(empty)</span>
-                )}
-          </div>
-        )}
+            {/* Cookies (independent page) */}
+            {sub === "cookies" && (
+              <CookieViewer headers={headers} />
+            )}
 
-        {session && sub === "raw" && (
-          <div className="font-mono text-[11px] text-nova-secondary whitespace-pre-wrap break-all">
-            <div className="mb-2 text-nova-tertiary">
-              {tab === "request" ? "Request" : "Response"} Raw:
-            </div>
-            {tab === "request"
-              ? `${session.method} ${session.path} HTTP/1.1\n${
-                  reqHeaders
-                    ? Object.entries(reqHeaders)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join("\n")
-                    : ""
-                }\n\n${session.requestBody ?? ""}`
-              : `HTTP/1.1 ${session.statusCode} ${session.statusText}\n${
-                  resHeaders
-                    ? Object.entries(resHeaders)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join("\n")
-                    : ""
-                }\n\n${session.responseBody ?? ""}`}
-          </div>
-        )}
-
-        {session && sub === "cookies" && (
-          <div className="text-xs text-nova-tertiary">
-            Cookie inspection not yet implemented.
-          </div>
+            {/* Raw (independent page) */}
+            {sub === "raw" && (
+              <div className="rounded-lg border border-white/[0.05] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-nova-secondary whitespace-pre-wrap break-all">
+                {tab === "request"
+                  ? `${session.method} ${session.path} HTTP/1.1\n${
+                      reqHeaders
+                        ? Object.entries(reqHeaders)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join("\n")
+                        : ""
+                    }\n\n${session.requestBody ?? ""}`
+                  : `HTTP/1.1 ${session.statusCode} ${session.statusText}\n${
+                      resHeaders
+                        ? Object.entries(resHeaders)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join("\n")
+                        : ""
+                    }\n\n${session.responseBody ?? ""}`}
+              </div>
+            )}
+          </>
         )}
 
         {session && tab === "rules" && (
-          <div className="font-mono text-[11px] text-nova-secondary">
+          <div className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-3 font-mono text-[11px] text-nova-secondary">
             {matchedRules && matchedRules.length > 0 ? (
               <>
-                <div className="mb-2 text-nova-tertiary">
-                  Matched Rules ({matchedRules.length}):
+                <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.05em] text-nova-tertiary">
+                  Matched Rules ({matchedRules.length})
                 </div>
-                <ul className="list-disc pl-4">
+                <ul className="space-y-1.5 list-none pl-0">
                   {matchedRules.map((rule, i) => (
-                    <li key={i} className="mb-1">
-                      {rule}
+                    <li
+                      key={i}
+                      className="flex items-center gap-2 rounded bg-white/[0.03] px-2.5 py-1.5"
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-white/[0.06] text-[10px] tabular-nums text-nova-tertiary">
+                        {i + 1}
+                      </span>
+                      <span>{rule}</span>
                     </li>
                   ))}
                 </ul>
