@@ -1,5 +1,8 @@
-@import "@fontsource-variable/jetbrains-mono";
 @import "tailwindcss";
+
+@theme {
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
 
 /* ===== Nebula Proxy 设计令牌 ===== */
 :root {
