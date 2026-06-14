@@ -100,19 +100,19 @@ export function InspectorPanel({ session }: InspectorPanelProps) {
         : [];
 
   return (
-    <Panel className="w-[400px] shrink-0">
+    <Panel className="h-full">
       {/* Main Tabs */}
-      <div className="flex h-11 items-end gap-0.5 border-b border-white/[0.08] px-1.5">
+      <div className="relative z-10 flex h-9 gap-0.5 border-b border-white/[0.08]">
         {INSPECTOR_TABS.map((t) => (
           <button
             type="button"
             key={t}
             onClick={() => setTab(t)}
             className={cn(
-              "cursor-pointer rounded-t-lg border-none bg-transparent px-3.5 py-1.5 font-[inherit] text-xs transition-all duration-200",
+              "cursor-pointer rounded-t-lg border-t border-l border-r bg-transparent px-3.5 py-2 font-[inherit] text-xs h-full",
               tab === t
-                ? "border-b-2 border-white/30 bg-white/[0.08] text-nova-primary"
-                : "text-nova-tertiary",
+                ? "border-white/[0.08] bg-white/[0.04] text-nova-primary"
+                : "border-transparent text-nova-tertiary hover:text-nova-secondary",
             )}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -121,17 +121,17 @@ export function InspectorPanel({ session }: InspectorPanelProps) {
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex border-b border-white/5 px-1">
+      <div className="flex border-b border-white/5 px-1.5">
         {SUB_TABS.map((st) => (
           <button
             type="button"
             key={st}
             onClick={() => setSub(st)}
             className={cn(
-              "cursor-pointer border-b-2 border-none bg-transparent px-3 py-1.5 font-[inherit] text-[10px] uppercase tracking-[0.05em]",
+              "cursor-pointer border-b-2 border-transparent bg-transparent px-2.5 py-1.5 font-[inherit] text-[10px] uppercase tracking-[0.05em] transition-colors",
               sub === st
-                ? "border-b-white/40 text-nova-primary"
-                : "border-b-transparent text-nova-tertiary",
+                ? "border-white/30 text-nova-primary"
+                : "text-nova-tertiary hover:text-nova-secondary hover:bg-white/[0.03]",
             )}
           >
             {st}

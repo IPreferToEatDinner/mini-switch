@@ -79,9 +79,10 @@ export default {
           "sans-serif",
         ],
         mono: [
-          '"SF Mono"',
+          '"JetBrains Mono Variable"',
+          '"JetBrains Mono"',
           '"Fira Code"',
-          '"Fira Mono"',
+          '"SF Mono"',
           "ui-monospace",
           "monospace",
         ],

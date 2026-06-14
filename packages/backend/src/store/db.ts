@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { count, desc, eq, sql } from "drizzle-orm";
+import { count, desc, eq, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-sqlite";
 import {
   logs,
@@ -161,7 +161,28 @@ export type SessionRecord = Session;
 export function querySessions(
   limit = 50,
   offset = 0,
+  search?: string,
 ): SessionRecord[] {
+  if (search) {
+    const pattern = `%${search}%`;
+    return db
+      .select()
+      .from(sessions)
+      .where(
+        or(
+          like(sessions.responseBody, pattern),
+          like(sessions.requestBody, pattern),
+          like(sessions.url, pattern),
+          like(sessions.host, pattern),
+          like(sessions.path, pattern),
+        ),
+      )
+      .orderBy(desc(sessions.startedAt))
+      .limit(limit)
+      .offset(offset)
+      .all();
+  }
+
   return db
     .select()
     .from(sessions)
@@ -183,8 +204,26 @@ export function clearSessions(): void {
   db.delete(sessions).run();
 }
 
-export function getSessionCount(): number {
-  const rows = db.select({ cnt: count() }).from(sessions).all();
+export function getSessionCount(search?: string): number {
+  if (!search) {
+    const rows = db.select({ cnt: count() }).from(sessions).all();
+    return rows[0]?.cnt ?? 0;
+  }
+
+  const pattern = `%${search}%`;
+  const rows = db
+    .select({ cnt: count() })
+    .from(sessions)
+    .where(
+      or(
+        like(sessions.responseBody, pattern),
+        like(sessions.requestBody, pattern),
+        like(sessions.url, pattern),
+        like(sessions.host, pattern),
+        like(sessions.path, pattern),
+      ),
+    )
+    .all();
   return rows[0]?.cnt ?? 0;
 }
 

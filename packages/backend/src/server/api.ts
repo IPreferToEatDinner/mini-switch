@@ -70,8 +70,9 @@ function handleApi(req: IncomingMessage, res: ServerResponse): boolean {
   if (pathname === "/__api/sessions" && method === "GET") {
     const limit = Number(url.searchParams.get("limit")) || 50;
     const offset = Number(url.searchParams.get("offset")) || 0;
-    const sessions = querySessions(limit, offset);
-    const total = getSessionCount();
+    const search = url.searchParams.get("search") ?? undefined;
+    const sessions = querySessions(limit, offset, search);
+    const total = getSessionCount(search);
     json(res, { sessions, total });
     return true;
   }

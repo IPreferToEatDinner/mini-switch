@@ -40,8 +40,13 @@ async function fetchJson<T>(url: string): Promise<T> {
 export async function fetchSessions(
   limit = 50,
   offset = 0,
+  search?: string,
 ): Promise<{ sessions: SessionRecord[]; total: number }> {
-  return fetchJson(`${API_BASE}/sessions?limit=${limit}&offset=${offset}`);
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  params.set("offset", String(offset));
+  if (search) params.set("search", search);
+  return fetchJson(`${API_BASE}/sessions?${params}`);
 }
 
 export async function fetchSession(

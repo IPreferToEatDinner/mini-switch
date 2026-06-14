@@ -49,7 +49,7 @@ function formatSession(record: SessionRecord): SessionItem {
   };
 }
 
-export function useSessions() {
+export function useSessions(search?: string) {
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | undefined>();
   const [selectedSession, setSelectedSession] = useState<SessionRecord | null>(
@@ -59,12 +59,12 @@ export function useSessions() {
 
   const loadSessions = useCallback(async () => {
     try {
-      const res = await fetchSessions(100);
+      const res = await fetchSessions(100, 0, search);
       setSessions((res.sessions || []).map(formatSession));
     } catch {
       // API not available yet
     }
-  }, []);
+  }, [search]);
 
   const loadSessionDetail = useCallback(async (id: number) => {
     try {
@@ -90,7 +90,7 @@ export function useSessions() {
     setSelectedSession(null);
   }, []);
 
-  // Polling
+  // Polling — restart when search changes
   useEffect(() => {
     loadSessions();
     intervalRef.current = setInterval(loadSessions, POLL_INTERVAL);
