@@ -45,5 +45,22 @@ export const logs = sqliteTable(
   ],
 );
 
+export const rules = sqliteTable(
+  "rules",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    /** JSON: RuleMatch { method?, hostname?, path? } */
+    match: text("match").notNull(),
+    /** JSON: RuleAction[] */
+    actions: text("actions").notNull(),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [index("idx_rules_name").on(table.name)],
+);
+
 export type Session = typeof sessions.$inferSelect;
 export type Log = typeof logs.$inferSelect;
+export type Rule = typeof rules.$inferSelect;
