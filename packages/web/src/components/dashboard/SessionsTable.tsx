@@ -7,6 +7,7 @@ export interface SessionItem {
   id: number;
   status: number;
   method: string;
+  protocol: "HTTP" | "HTTPS";
   host: string;
   path: string;
   type: string;
@@ -48,6 +49,9 @@ export function SessionsTable({
               <th className={thClass} style={{ width: 70 }}>
                 Method
               </th>
+              <th className={thClass} style={{ width: 70 }}>
+                Protocol
+              </th>
               <th className={thClass} style={{ width: 180 }}>
                 Host
               </th>
@@ -75,6 +79,17 @@ export function SessionsTable({
                   <StatusPill status={s.status} />
                 </td>
                 <td className={tdClass}>{s.method}</td>
+                <td className={tdClass}>
+                  <span
+                    className={
+                      s.protocol === "HTTPS"
+                        ? "text-emerald-400"
+                        : "text-nova-tertiary"
+                    }
+                  >
+                    {s.protocol}
+                  </span>
+                </td>
                 <td className={tdClass}>{s.host}</td>
                 <td className={tdClass}>{s.path}</td>
                 <td className={tdClass}>{s.type}</td>
