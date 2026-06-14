@@ -4,25 +4,60 @@ interface StatusPillProps {
   status: number;
 }
 
-const statusStyle = (code: number) => {
-  if (code === 200) return "text-nova-green border-nova-green/20";
-  if (code === 304) return "text-nova-yellow border-nova-yellow/20";
-  if (code === 404) return "text-nova-red border-nova-red/20";
-  if (code === 204) return "text-nova-blue border-nova-blue/20";
-  if (code >= 400) return "text-nova-red border-nova-red/20";
-  return "text-nova-green border-nova-green/20";
+const statusText: Record<number, string> = {
+  200: "OK",
+  201: "Created",
+  204: "No Content",
+  301: "Moved",
+  302: "Found",
+  304: "Not Modified",
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  405: "Method Not Allowed",
+  408: "Timeout",
+  429: "Too Many",
+  500: "Server Error",
+  502: "Bad Gateway",
+  503: "Unavailable",
+  504: "Gateway Timeout",
 };
 
-/** 状态码标签（2xx 绿 / 304 黄 / 4xx 红 / 204 蓝） */
+function statusConfig(code: number) {
+  const cat = Math.floor(code / 100);
+  if (cat === 2) return { bg: "bg-emerald-500/15", text: "text-emerald-400" };
+  if (cat === 3) return { bg: "bg-amber-500/15", text: "text-amber-400" };
+  if (cat === 4) return { bg: "bg-red-500/15", text: "text-red-400" };
+  if (cat === 5) return { bg: "bg-rose-500/15", text: "text-rose-400" };
+  return { bg: "bg-white/10", text: "text-nova-tertiary" };
+}
+
+/** HTTP 状态码胶囊标签 */
 export function StatusPill({ status }: StatusPillProps) {
+  if (status === 0) {
+    return (
+      <span className="rounded bg-white/10 px-1.5 py-px font-mono text-[10px] text-nova-tertiary">
+        —
+      </span>
+    );
+  }
+
+  const cfg = statusConfig(status);
+  const label = statusText[status];
+
   return (
     <span
       className={cn(
-        "rounded-[3px] border bg-black/30 px-1.5 py-px font-mono text-[10px] font-semibold",
-        statusStyle(status),
+        "inline-flex items-center gap-1 rounded px-1.5 py-px font-mono text-[10px] font-semibold",
+        cfg.bg,
+        cfg.text,
       )}
     >
-      {status} OK
+      {status}
+      {label && (
+        <span className="opacity-70">{label}</span>
+      )}
     </span>
   );
 }
